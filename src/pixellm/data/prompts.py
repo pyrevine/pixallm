@@ -1,12 +1,18 @@
 """Prompt normalization for PixelLM datasets."""
 
+from __future__ import annotations
+
+import re
+
 PROMPT_PREFIX = "Draw 16x16 pixel art as Palette Index Grid DSL:"
+BACKGROUND_SUFFIX_RE = re.compile(r"\s+on an?\s+[-a-zA-Z ]+\s+background\.?$", re.IGNORECASE)
 
 
 def normalize_caption(caption: str) -> str:
     """Normalize source captions while preserving their semantic content."""
 
-    return " ".join(caption.strip().split())
+    normalized = " ".join(caption.strip().split())
+    return BACKGROUND_SUFFIX_RE.sub("", normalized).strip()
 
 
 def build_prompt(caption: str) -> str:

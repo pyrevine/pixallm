@@ -15,6 +15,7 @@ from pixellm.render import render_pixel_art
 
 DEFAULT_ALPHA_THRESHOLD = 127
 DEFAULT_MAX_NONTRANSPARENT_COLORS = 7
+DEFAULT_BACKGROUND_TOLERANCE = 8
 
 
 @dataclass(frozen=True)
@@ -29,6 +30,8 @@ def prepare_image(
     target_size: int = GRID_SIZE,
     alpha_threshold: int = DEFAULT_ALPHA_THRESHOLD,
     max_nontransparent_colors: int = DEFAULT_MAX_NONTRANSPARENT_COLORS,
+    remove_border_background: bool = False,
+    background_tolerance: int = DEFAULT_BACKGROUND_TOLERANCE,
 ) -> PreparedImage:
     """Convert an image into PixelArt plus its canonical 16x16 rendering."""
 
@@ -38,8 +41,13 @@ def prepare_image(
         raise ValueError("alpha_threshold must be between 0 and 255.")
     if not 1 <= max_nontransparent_colors <= DEFAULT_MAX_NONTRANSPARENT_COLORS:
         raise ValueError("max_nontransparent_colors must be between 1 and 7.")
+    if background_tolerance < 0:
+        raise ValueError("background_tolerance must be >= 0.")
 
     resized = image.convert("RGBA").resize((target_size, target_size), Image.Resampling.NEAREST)
+    if remove_border_background:
+        resized = remove_background_from_edges(resized, tolerance=background_tolerance)
+
     rgba_pixels = _image_data(resized)
     opaque_positions = [idx for idx, pixel in enumerate(rgba_pixels) if pixel[3] > alpha_threshold]
 
@@ -78,16 +86,16 @@ def prepare_image(
     return PreparedImage(pixel_art=pixel_art, canonical_image=render_pixel_art(pixel_art, scale=1))
 
 
-def image_to_pixel_art(image: Image.Image) -> PixelArt:
+def image_to_pixel_art(image: Image.Image, *, remove_border_background: bool = False) -> PixelArt:
     """Convert an image to internal PixelArt."""
 
-    return prepare_image(image).pixel_art
+    return prepare_image(image, remove_border_background=remove_border_background).pixel_art
 
 
-def image_to_dsl(image: Image.Image) -> str:
+def image_to_dsl(image: Image.Image, *, remove_border_background: bool = False) -> str:
     """Convert an image to external tag DSL."""
 
-    return serialize_dsl(image_to_pixel_art(image))
+    return serialize_dsl(image_to_pixel_art(image, remove_border_background=remove_border_background))
 
 
 def build_training_record(
@@ -141,7 +149,7 @@ def iter_nouns_records(limit: int | None = None) -> Iterable[dict[str, str]]:
     for row_idx, item in enumerate(dataset):
         if limit is not None and row_idx >= limit:
             break
-        dsl = image_to_dsl(item["image"])
+        dsl = image_to_dsl(item["image"], remove_border_background=True)
         yield build_training_record(
             caption=item["text"],
             dsl=dsl,
@@ -151,6 +159,58 @@ def iter_nouns_records(limit: int | None = None) -> Iterable[dict[str, str]]:
             view="front",
             license="cc0-1.0",
         )
+
+
+def remove_background_from_edges(image: Image.Image, *, tolerance: int) -> Image.Image:
+    """Make border-connected background pixels transparent.
+
+    Nouns-style samples have a flat background. Flood filling from edges avoids
+    removing interior pixels that happen to share the background color.
+    """
+
+    rgba = image.convert("RGBA")
+    pixels = rgba.load()
+    width, height = rgba.size
+    background = _dominant_corner_color(rgba)
+    stack = [
+        *[(x, 0) for x in range(width)],
+        *[(x, height - 1) for x in range(width)],
+        *[(0, y) for y in range(height)],
+        *[(width - 1, y) for y in range(height)],
+    ]
+    seen: set[tuple[int, int]] = set()
+
+    while stack:
+        x, y = stack.pop()
+        if (x, y) in seen:
+            continue
+        seen.add((x, y))
+
+        color = pixels[x, y]
+        if color[3] == 0 or not _color_close(color[:3], background, tolerance):
+            continue
+
+        pixels[x, y] = (color[0], color[1], color[2], 0)
+        for nx, ny in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
+            if 0 <= nx < width and 0 <= ny < height:
+                stack.append((nx, ny))
+
+    return rgba
+
+
+def _dominant_corner_color(image: Image.Image) -> tuple[int, int, int]:
+    width, height = image.size
+    corners = [
+        image.getpixel((0, 0))[:3],
+        image.getpixel((width - 1, 0))[:3],
+        image.getpixel((0, height - 1))[:3],
+        image.getpixel((width - 1, height - 1))[:3],
+    ]
+    return max(set(corners), key=corners.count)
+
+
+def _color_close(left: tuple[int, int, int], right: tuple[int, int, int], tolerance: int) -> bool:
+    return all(abs(a - b) <= tolerance for a, b in zip(left, right, strict=True))
 
 
 def _image_data(image: Image.Image) -> list[Any]:
