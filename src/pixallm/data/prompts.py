@@ -1,4 +1,4 @@
-"""Prompt normalization for PixelLM datasets."""
+"""Prompt normalization for pixallm datasets."""
 
 from __future__ import annotations
 

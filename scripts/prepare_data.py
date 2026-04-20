@@ -1,14 +1,14 @@
-"""Prepare PixelLM JSONL training data."""
+"""Prepare pixallm JSONL training data."""
 
 from __future__ import annotations
 
 import argparse
 
-from pixellm.data.prepare import iter_nouns_records, write_jsonl
+from pixallm.data.prepare import iter_nouns_records, write_jsonl
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Prepare PixelLM SFT JSONL data.")
+    parser = argparse.ArgumentParser(description="Prepare pixallm SFT JSONL data.")
     parser.add_argument("--output", default="data/processed/train_v1.jsonl")
     parser.add_argument("--limit", type=int, default=3000)
     args = parser.parse_args()

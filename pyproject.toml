@@ -27,7 +27,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pixellm"]
+packages = ["src/pixallm"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

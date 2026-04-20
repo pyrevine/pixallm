@@ -1,4 +1,4 @@
-"""QLoRA SFT entrypoint for PixelLM."""
+"""QLoRA SFT entrypoint for pixallm."""
 
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ def main() -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train PixelLM SFT v1 with QLoRA.")
+    parser = argparse.ArgumentParser(description="Train pixallm SFT v1 with QLoRA.")
     parser.add_argument("--model-name", default=DEFAULT_MODEL)
     parser.add_argument("--train-file", default=DEFAULT_TRAIN_FILE)
     parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)

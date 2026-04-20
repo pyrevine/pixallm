@@ -1,6 +1,6 @@
 # Palette Index Grid DSL
 
-`pixellm` uses a compact text DSL for 16x16 pixel art. The model is trained to emit this DSL directly, and the rest of the pipeline parses, renders, and scores it.
+`pixallm` uses a compact text DSL for 16x16 pixel art. The model is trained to emit this DSL directly, and the rest of the pipeline parses, renders, and scores it.
 
 ## Format
 

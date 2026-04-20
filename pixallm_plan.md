@@ -1,8 +1,8 @@
-# pixellm — Project Plan
+# pixallm — Project Plan
 
 **Teaching small LLMs to draw pixel art via code generation, progressing from SFT to GRPO with multi-component rewards.**
 
-> 이 문서는 `pixellm` 프로젝트의 통합 실행 계획입니다. 여러 차례 피드백과 리뷰를 거쳐 확정된 설계 결정과 단계별 로드맵을 담고 있습니다.
+> 이 문서는 `pixallm` 프로젝트의 통합 실행 계획입니다. 여러 차례 피드백과 리뷰를 거쳐 확정된 설계 결정과 단계별 로드맵을 담고 있습니다.
 
 ---
 
@@ -56,7 +56,7 @@
 **직렬화 원칙:**
 - 외부 학습/평가 target은 항상 `<PALETTE>` / `<GRID>` 태그 기반 텍스트 DSL
 - Pydantic 모델은 내부 표현과 검증용으로만 사용
-- `src/pixellm/dsl.py`는 `parse_dsl(text) -> PixelArt`, `serialize_dsl(pixel_art) -> str`, `validate_pixel_art(pixel_art)`를 제공
+- `src/pixallm/dsl.py`는 `parse_dsl(text) -> PixelArt`, `serialize_dsl(pixel_art) -> str`, `validate_pixel_art(pixel_art)`를 제공
 - 학습 JSONL의 `dsl` 필드는 JSON 문자열이 아니라 태그 DSL 문자열
 
 **팔레트 변환 규칙:**
@@ -196,14 +196,14 @@ w_vlm       = 0.4   # VLM judge 추가
 ## 4. 리포지토리 구조
 
 ```
-pixellm/
+pixallm/
 ├── README.md
 ├── pyproject.toml
 ├── uv.lock
 ├── .gitignore
 ├── .python-version
 ├── src/
-│   ├── pixellm/
+│   ├── pixallm/
 │   │   ├── __init__.py
 │   │   ├── dsl.py              # Palette Index Grid parser/validator
 │   │   ├── render.py           # DSL → PIL Image
@@ -254,27 +254,27 @@ pixellm/
 **목표**: 데이터 파이프라인과 DSL 유틸리티 완성. 첫 commit.
 
 **Day 1 — 레포 + 환경 셋업**
-- [x] GitHub 레포 생성 (`pixellm`)
+- [x] GitHub 레포 생성 (`pixallm`)
 - [x] `uv init --python 3.12` + 의존성 설치
 - [x] README 1줄 + LICENSE + .gitignore
 - [x] **첫 commit push**
 
 ```bash
-mkdir pixellm && cd pixellm
+mkdir pixallm && cd pixallm
 git init
 uv init --python 3.12
 uv add pillow numpy pydantic datasets
 uv add --group train transformers trl peft accelerate bitsandbytes wandb
 uv add --group eval transformers pillow numpy
 uv add --dev pytest ruff
-echo "# pixellm" > README.md
+echo "# pixallm" > README.md
 git add . && git commit -m "initial commit"
 ```
 
 **Day 2 — DSL 구현 + 라운드트립 검증**
-- [x] 현재 flat `src/` 코드를 계획 구조인 `src/pixellm/` 패키지로 재배치
-- [x] `src/pixellm/dsl.py`: 태그 DSL 파서/직렬화기, 내부 Pydantic 모델, 밸리데이터
-- [x] `src/pixellm/render.py`: DSL → PIL Image
+- [x] 현재 flat `src/` 코드를 계획 구조인 `src/pixallm/` 패키지로 재배치
+- [x] `src/pixallm/dsl.py`: 태그 DSL 파서/직렬화기, 내부 Pydantic 모델, 밸리데이터
+- [x] `src/pixallm/render.py`: DSL → PIL Image
 - [x] `tests/test_dsl_roundtrip.py`: 전처리 후 canonical 16×16 RGBA 이미지 → DSL → 이미지 픽셀 정확도 95%+
 
 **Critical path**: 이 라운드트립이 정확해야 이후 모든 단계가 의미 있음.
@@ -288,7 +288,7 @@ git add . && git commit -m "initial commit"
 - [x] 샘플 시각 검수: 랜덤 50개 뽑아 원본 vs 재렌더링 비교
 
 **Day 5-6 — 평가 메트릭 기본**
-- [x] `src/pixellm/eval/metrics.py`:
+- [x] `src/pixallm/eval/metrics.py`:
   - `parse_rate(outputs)` — DSL 파싱 성공률
   - `palette_constraint_score(dsl)` — 선언 팔레트 vs 사용 색상 일치
   - `non_empty_score(dsl)` — 최소 픽셀 수
@@ -318,7 +318,7 @@ git add . && git commit -m "initial commit"
 - [ ] `scripts/runpod_setup.sh`: uv sync, HF 캐시 설정, wandb login
 
 **Day 3-5 — SFT 학습**
-- [x] `src/pixellm/train/sft.py` 구현
+- [x] `src/pixallm/train/sft.py` 구현
 - [ ] 하이퍼파라미터: QLoRA r=16, lr=2e-4, epoch=3, batch=2×8(accum)
 - [x] Qwen tokenizer의 `apply_chat_template()` 사용
 - [x] SFT collator에서 raw `{prompt, dsl}`를 messages로 변환:
@@ -349,17 +349,17 @@ git add . && git commit -m "initial commit"
 ### Week 3 — 평가 시스템 + GRPO 준비
 
 **Day 1-3 — CLIP 평가 자동화**
-- [ ] `src/pixellm/eval/clip_eval.py`: `openai/clip-vit-base-patch32` 기반
-- [ ] `src/pixellm/eval/run_eval.py`: 체크포인트 → 100 프롬프트 × 4 샘플 → 전체 메트릭
+- [ ] `src/pixallm/eval/clip_eval.py`: `openai/clip-vit-base-patch32` 기반
+- [ ] `src/pixallm/eval/run_eval.py`: 체크포인트 → 100 프롬프트 × 4 샘플 → 전체 메트릭
 - [ ] 결과 JSON 저장 + `docs/results/metrics.md` 표 생성
 
 **Day 4-5 — Reward 함수 구현**
-- [ ] `src/pixellm/rewards/`: 각 reward 모듈화
+- [ ] `src/pixallm/rewards/`: 각 reward 모듈화
 - [ ] `tests/test_rewards.py`: 엣지 케이스 (empty, invalid, perfect)
 - [ ] Reward Phase 1 조합 테스트 (수작업 샘플로 sanity check)
 
 **Day 6-7 — GRPO 파일럿**
-- [ ] `src/pixellm/train/grpo.py` 구현 (TRL GRPOTrainer)
+- [ ] `src/pixallm/train/grpo.py` 구현 (TRL GRPOTrainer)
 - [ ] Phase 1 가중치로 200 step 파일럿
 - [ ] Reward 분포, KL, 출력 길이 wandb 모니터링
 - [ ] **매 10 step 이미지 로깅** (고정 프롬프트 5개) ← 핵심
@@ -398,7 +398,7 @@ git add . && git commit -m "initial commit"
 ### Week 5 — 프론트엔드 + 데모
 
 **Day 1-3 — 추론 서버**
-- [ ] `src/pixellm/serve/api.py`: FastAPI
+- [ ] `src/pixallm/serve/api.py`: FastAPI
   - `POST /generate` — prompt → DSL + rendered PNG
   - `GET /models` — 현재 로드된 체크포인트 목록
   - 기본은 단일 활성 모델 로드, base / SFT / GRPO 비교는 캐시된 결과 우선 사용
@@ -545,7 +545,7 @@ git add . && git commit -m "initial commit"
 ```bash
 # 1. 레포 생성 (GitHub)
 # 2. 로컬 셋업
-mkdir pixellm && cd pixellm
+mkdir pixallm && cd pixallm
 git init
 uv init --python 3.12
 
@@ -557,7 +557,7 @@ uv add --dev pytest ruff
 
 # 4. 최소 파일
 cat > README.md << 'EOF'
-# pixellm
+# pixallm
 
 Teaching small LLMs to draw pixel art via code generation, progressing from SFT to GRPO with multi-component rewards.
 
@@ -585,7 +585,7 @@ echo "3.12" > .python-version
 # 5. 첫 commit
 git add .
 git commit -m "initial commit: project scaffolding"
-git remote add origin git@github.com:pyrevine/pixellm.git
+git remote add origin git@github.com:pyrevine/pixallm.git
 git push -u origin main
 ```
 

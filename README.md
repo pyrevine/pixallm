@@ -1,8 +1,8 @@
-# pixellm
+# pixallm
 
 Teaching small LLMs to draw 16x16 pixel art through code generation.
 
-`pixellm` trains an open-source language model to emit a compact Palette Index Grid DSL. The generated text can be parsed, validated, rendered to a PNG, and scored with deterministic rewards before moving into GRPO.
+`pixallm` trains an open-source language model to emit a compact Palette Index Grid DSL. The generated text can be parsed, validated, rendered to a PNG, and scored with deterministic rewards before moving into GRPO.
 
 ## Status
 
@@ -52,7 +52,7 @@ uv run python scripts/preview_samples.py --input data/processed/train_v1.jsonl -
 The first SFT target is Qwen2.5-Coder-3B-Instruct with QLoRA.
 
 ```bash
-uv run python -m pixellm.train.sft \
+uv run python -m pixallm.train.sft \
   --train-file data/processed/train_v1.jsonl \
   --output-dir checkpoints/sft-v1 \
   --report-to none
@@ -63,11 +63,11 @@ For RunPod training, pass `--report-to wandb` after installing and logging into 
 ## Project Layout
 
 ```text
-src/pixellm/dsl.py            # Palette Index Grid parser/validator
-src/pixellm/render.py         # DSL -> PIL image
-src/pixellm/data/prepare.py   # dataset/image conversion
-src/pixellm/eval/metrics.py   # deterministic metrics
-src/pixellm/train/sft.py      # QLoRA SFT entrypoint
+src/pixallm/dsl.py            # Palette Index Grid parser/validator
+src/pixallm/render.py         # DSL -> PIL image
+src/pixallm/data/prepare.py   # dataset/image conversion
+src/pixallm/eval/metrics.py   # deterministic metrics
+src/pixallm/train/sft.py      # QLoRA SFT entrypoint
 scripts/prepare_data.py       # JSONL generation
 scripts/preview_samples.py    # contact sheet preview
 data/eval_prompts.json        # fixed eval prompts

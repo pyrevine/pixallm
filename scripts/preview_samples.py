@@ -1,4 +1,4 @@
-"""Render prepared PixelLM JSONL samples into a contact sheet."""
+"""Render prepared pixallm JSONL samples into a contact sheet."""
 
 from __future__ import annotations
 
@@ -11,12 +11,12 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 
-from pixellm.dsl import parse_dsl
-from pixellm.render import render_pixel_art
+from pixallm.dsl import parse_dsl
+from pixallm.render import render_pixel_art
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Preview prepared PixelLM JSONL samples.")
+    parser = argparse.ArgumentParser(description="Preview prepared pixallm JSONL samples.")
     parser.add_argument("--input", default="data/processed/train_v1.jsonl")
     parser.add_argument("--output", default="docs/results/gallery/train_preview.png")
     parser.add_argument("--limit", type=int, default=50)

@@ -2,10 +2,10 @@ from PIL import Image, ImageDraw
 
 import pytest
 
-from pixellm.data.prepare import image_to_dsl, prepare_image
-from pixellm.data.prompts import normalize_caption
-from pixellm.dsl import DSLParseError, PixelArt, parse_dsl, serialize_dsl
-from pixellm.render import render_pixel_art
+from pixallm.data.prepare import image_to_dsl, prepare_image
+from pixallm.data.prompts import normalize_caption
+from pixallm.dsl import DSLParseError, PixelArt, parse_dsl, serialize_dsl
+from pixallm.render import render_pixel_art
 
 
 def test_dsl_parse_serialize_roundtrip() -> None:

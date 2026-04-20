@@ -1,6 +1,6 @@
 from argparse import Namespace
 
-from pixellm.train.sft import build_lora_config, build_sft_config, parse_target_modules, record_to_messages
+from pixallm.train.sft import build_lora_config, build_sft_config, parse_target_modules, record_to_messages
 
 
 def test_record_to_messages_uses_prompt_and_dsl() -> None:
@@ -34,7 +34,7 @@ def test_sft_config_defaults_match_plan() -> None:
         logging_steps=10,
         save_steps=200,
         report_to="none",
-        run_name="pixellm-sft-v1",
+        run_name="pixallm-sft-v1",
         seed=42,
     )
 
