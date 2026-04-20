@@ -48,7 +48,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--logging-steps", type=int, default=10)
     parser.add_argument("--save-steps", type=int, default=200)
     parser.add_argument("--report-to", default="none", help="Use 'wandb' on RunPod after wandb login.")
-    parser.add_argument("--run-name", default="pixellm-sft-v1")
+    parser.add_argument("--run-name", default="pixallm-sft-v1")
     parser.add_argument("--lora-r", type=int, default=16)
     parser.add_argument("--lora-alpha", type=int, default=32)
     parser.add_argument("--lora-dropout", type=float, default=0.05)

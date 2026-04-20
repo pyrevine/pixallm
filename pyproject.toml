@@ -1,5 +1,5 @@
 [project]
-name = "pixellm"
+name = "pixallm"
 version = "0.1.0"
 description = "Teaching small LLMs to draw pixel art via code generation."
 readme = "README.md"

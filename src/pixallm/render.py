@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from PIL import Image
 
-from pixellm.dsl import GRID_SIZE, PixelArt, parse_dsl
+from pixallm.dsl import GRID_SIZE, PixelArt, parse_dsl
 
 
 def render_pixel_art(pixel_art: PixelArt | str, scale: int = 20) -> Image.Image:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import deque
 
-from pixellm.dsl import GRID_SIZE, PixelArt, parse_dsl
+from pixallm.dsl import GRID_SIZE, PixelArt, parse_dsl
 
 
 def parse_rate(outputs: list[str]) -> float:

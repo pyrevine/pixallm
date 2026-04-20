@@ -9,9 +9,9 @@ from typing import Any, Iterable
 
 from PIL import Image
 
-from pixellm.data.prompts import build_prompt, normalize_caption
-from pixellm.dsl import GRID_SIZE, PixelArt, serialize_dsl
-from pixellm.render import render_pixel_art
+from pixallm.data.prompts import build_prompt, normalize_caption
+from pixallm.dsl import GRID_SIZE, PixelArt, serialize_dsl
+from pixallm.render import render_pixel_art
 
 DEFAULT_ALPHA_THRESHOLD = 127
 DEFAULT_MAX_NONTRANSPARENT_COLORS = 7
