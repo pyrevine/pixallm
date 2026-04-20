@@ -255,9 +255,9 @@ pixellm/
 
 **Day 1 — 레포 + 환경 셋업**
 - [x] GitHub 레포 생성 (`pixellm`)
-- [ ] `uv init --python 3.12` + 의존성 설치
-- [ ] README 1줄 + LICENSE + .gitignore
-- [ ] **첫 commit push**
+- [x] `uv init --python 3.12` + 의존성 설치
+- [x] README 1줄 + LICENSE + .gitignore
+- [x] **첫 commit push**
 
 ```bash
 mkdir pixellm && cd pixellm
@@ -272,34 +272,34 @@ git add . && git commit -m "initial commit"
 ```
 
 **Day 2 — DSL 구현 + 라운드트립 검증**
-- [ ] 현재 flat `src/` 코드를 계획 구조인 `src/pixellm/` 패키지로 재배치
-- [ ] `src/pixellm/dsl.py`: 태그 DSL 파서/직렬화기, 내부 Pydantic 모델, 밸리데이터
-- [ ] `src/pixellm/render.py`: DSL → PIL Image
-- [ ] `tests/test_dsl_roundtrip.py`: 전처리 후 canonical 16×16 RGBA 이미지 → DSL → 이미지 픽셀 정확도 95%+
+- [x] 현재 flat `src/` 코드를 계획 구조인 `src/pixellm/` 패키지로 재배치
+- [x] `src/pixellm/dsl.py`: 태그 DSL 파서/직렬화기, 내부 Pydantic 모델, 밸리데이터
+- [x] `src/pixellm/render.py`: DSL → PIL Image
+- [x] `tests/test_dsl_roundtrip.py`: 전처리 후 canonical 16×16 RGBA 이미지 → DSL → 이미지 픽셀 정확도 95%+
 
 **Critical path**: 이 라운드트립이 정확해야 이후 모든 단계가 의미 있음.
 
 **Day 3-4 — 데이터 파이프라인**
-- [ ] `m1guelpf/nouns` 다운로드: `image` + `text`, CC0, SFT v1 주 데이터셋
+- [x] `m1guelpf/nouns` 다운로드: `image` + `text`, CC0, SFT v1 주 데이터셋
 - [ ] `Sc077y/pixel-art-synthetic-10k` 다운로드: `id` + `prompt` + `grid` + `preview`, MIT, 보조/평가 후보
-- [ ] `scripts/prepare_data.py`: 이미지 → 16×16 resize → alpha threshold 적용 → 비투명 7색 양자화 → 태그 DSL 변환
-- [ ] 최종 JSONL 생성: `{caption, prompt, dsl, source, source_id, category, view, license}` 형식 2,000-3,000 샘플
-- [ ] SFT v1 데이터는 `category="character"`, `view="front"` 중심으로 구성
-- [ ] 샘플 시각 검수: 랜덤 50개 뽑아 원본 vs 재렌더링 비교
+- [x] `scripts/prepare_data.py`: 이미지 → 16×16 resize → alpha threshold 적용 → 비투명 7색 양자화 → 태그 DSL 변환
+- [x] 최종 JSONL 생성: `{caption, prompt, dsl, source, source_id, category, view, license}` 형식 2,000-3,000 샘플
+- [x] SFT v1 데이터는 `category="character"`, `view="front"` 중심으로 구성
+- [x] 샘플 시각 검수: 랜덤 50개 뽑아 원본 vs 재렌더링 비교
 
 **Day 5-6 — 평가 메트릭 기본**
-- [ ] `src/pixellm/eval/metrics.py`:
+- [x] `src/pixellm/eval/metrics.py`:
   - `parse_rate(outputs)` — DSL 파싱 성공률
   - `palette_constraint_score(dsl)` — 선언 팔레트 vs 사용 색상 일치
   - `non_empty_score(dsl)` — 최소 픽셀 수
   - `symmetry_score(dsl)` — 좌우 대칭
   - `connected_component_score(dsl)` — 픽셀 응집도
-- [ ] `data/eval_prompts.json`: 평가용 고정 100개 프롬프트
+- [x] `data/eval_prompts.json`: 평가용 고정 100개 프롬프트
 
 **Day 7 — 문서 + Week 1 마무리**
-- [ ] `docs/dsl_design.md`: DSL 포맷 선택 이유, 고려한 alternatives
-- [ ] README 업데이트: 프로젝트 개요, 아키텍처 개략도
-- [ ] Week 1 성과 commit
+- [x] `docs/dsl_design.md`: DSL 포맷 선택 이유, 고려한 alternatives
+- [x] README 업데이트: 프로젝트 개요, 아키텍처 개략도
+- [x] Week 1 성과 commit
 
 **Week 1 성공 기준:**
 - ✅ 레포 public, 2,000+ 학습 샘플 JSONL 완성
@@ -318,15 +318,15 @@ git add . && git commit -m "initial commit"
 - [ ] `scripts/runpod_setup.sh`: uv sync, HF 캐시 설정, wandb login
 
 **Day 3-5 — SFT 학습**
-- [ ] `src/pixellm/train/sft.py` 구현
+- [x] `src/pixellm/train/sft.py` 구현
 - [ ] 하이퍼파라미터: QLoRA r=16, lr=2e-4, epoch=3, batch=2×8(accum)
-- [ ] Qwen tokenizer의 `apply_chat_template()` 사용
-- [ ] SFT collator에서 raw `{prompt, dsl}`를 messages로 변환:
+- [x] Qwen tokenizer의 `apply_chat_template()` 사용
+- [x] SFT collator에서 raw `{prompt, dsl}`를 messages로 변환:
   ```
   [{"role": "user", "content": "Draw 16x16 pixel art as Palette Index Grid DSL: {prompt}"},
    {"role": "assistant", "content": "{dsl}"}]
   ```
-- [ ] loss는 assistant completion token에만 적용
+- [x] loss는 assistant completion token에만 적용
 - [ ] Wandb logging: loss, learning rate, 매 200 step마다 고정 프롬프트 5개 샘플 이미지
 
 **Day 6-7 — 평가 + 분석**
