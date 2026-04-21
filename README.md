@@ -41,7 +41,7 @@ Rules:
 ## Quick Start
 
 ```bash
-uv sync
+uv sync --frozen
 uv run pytest
 uv run python scripts/prepare_data.py --limit 3000 --output data/processed/train_v1.jsonl
 uv run python scripts/preview_samples.py --input data/processed/train_v1.jsonl --output docs/results/gallery/train_v1_sample_50.png --limit 50 --sample --seed 42
@@ -52,6 +52,18 @@ uv run python scripts/preview_samples.py --input data/processed/train_v1.jsonl -
 The first SFT target is Qwen2.5-Coder-3B-Instruct with QLoRA.
 
 ```bash
+uv run python -m pixallm.train.sft \
+  --train-file data/processed/train_v1.jsonl \
+  --output-dir checkpoints/sft-v1 \
+  --report-to none
+```
+
+`torch` is declared as a direct dependency and pinned to the 2.11.x line so `uv sync --frozen` recreates the same training stack from `uv.lock`.
+
+On Linux GPU containers, if `import torch` fails with an NCCL symbol error, run with the NCCL library bundled in the environment first on `LD_LIBRARY_PATH`:
+
+```bash
+LD_LIBRARY_PATH=$PWD/.venv/lib/python3.12/site-packages/nvidia/nccl/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
 uv run python -m pixallm.train.sft \
   --train-file data/processed/train_v1.jsonl \
   --output-dir checkpoints/sft-v1 \

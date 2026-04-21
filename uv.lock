@@ -1219,6 +1219,7 @@ dependencies = [
     { name = "peft" },
     { name = "pillow" },
     { name = "pydantic" },
+    { name = "torch" },
     { name = "transformers" },
     { name = "trl" },
 ]
@@ -1238,6 +1239,7 @@ requires-dist = [
     { name = "peft", specifier = ">=0.19.1" },
     { name = "pillow", specifier = ">=12.2.0" },
     { name = "pydantic", specifier = ">=2.13.2" },
+    { name = "torch", specifier = ">=2.11.0,<2.12" },
     { name = "transformers", specifier = ">=5.5.4" },
     { name = "trl", specifier = ">=1.2.0" },
 ]

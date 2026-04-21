@@ -12,6 +12,7 @@ dependencies = [
     "peft>=0.19.1",
     "pillow>=12.2.0",
     "pydantic>=2.13.2",
+    "torch>=2.11.0,<2.12",
     "transformers>=5.5.4",
     "trl>=1.2.0",
 ]
