@@ -25,6 +25,15 @@ class SFTPaths:
     output_dir: Path
 
 
+@dataclass(frozen=True)
+class PrecisionConfig:
+    use_cpu: bool
+    bf16: bool
+    fp16: bool
+    torch_dtype: torch.dtype
+    compute_dtype: torch.dtype
+
+
 def main() -> None:
     args = parse_args()
     trainer = build_trainer(args)
@@ -108,16 +117,19 @@ def record_to_messages(record: dict[str, Any]) -> dict[str, list[dict[str, str]]
 
 
 def build_sft_config(args: argparse.Namespace) -> SFTConfig:
+    precision = resolve_precision(args)
     model_init_kwargs: dict[str, Any] = {
         "trust_remote_code": True,
-        "torch_dtype": torch.bfloat16 if not args.no_bf16 else torch.float16,
+        "torch_dtype": precision.torch_dtype,
     }
     if not args.no_4bit:
+        if precision.use_cpu:
+            raise ValueError("4-bit QLoRA requires CUDA. Use --no-4bit when running on CPU.")
         model_init_kwargs["quantization_config"] = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_quant_type="nf4",
             bnb_4bit_use_double_quant=True,
-            bnb_4bit_compute_dtype=torch.bfloat16 if not args.no_bf16 else torch.float16,
+            bnb_4bit_compute_dtype=precision.compute_dtype,
         )
         model_init_kwargs["device_map"] = "auto"
 
@@ -130,7 +142,9 @@ def build_sft_config(args: argparse.Namespace) -> SFTConfig:
         learning_rate=args.learning_rate,
         per_device_train_batch_size=args.per_device_train_batch_size,
         gradient_accumulation_steps=args.gradient_accumulation_steps,
-        bf16=not args.no_bf16,
+        use_cpu=precision.use_cpu,
+        bf16=precision.bf16,
+        fp16=precision.fp16,
         gradient_checkpointing=True,
         assistant_only_loss=True,
         packing=False,
@@ -142,6 +156,36 @@ def build_sft_config(args: argparse.Namespace) -> SFTConfig:
         run_name=args.run_name,
         seed=args.seed,
         model_init_kwargs=model_init_kwargs,
+    )
+
+
+def resolve_precision(args: argparse.Namespace) -> PrecisionConfig:
+    """Select a precision mode that the current runtime actually supports."""
+
+    if not torch.cuda.is_available():
+        return PrecisionConfig(
+            use_cpu=True,
+            bf16=False,
+            fp16=False,
+            torch_dtype=torch.float32,
+            compute_dtype=torch.float32,
+        )
+
+    if not args.no_bf16 and torch.cuda.is_bf16_supported():
+        return PrecisionConfig(
+            use_cpu=False,
+            bf16=True,
+            fp16=False,
+            torch_dtype=torch.bfloat16,
+            compute_dtype=torch.bfloat16,
+        )
+
+    return PrecisionConfig(
+        use_cpu=False,
+        bf16=False,
+        fp16=True,
+        torch_dtype=torch.float16,
+        compute_dtype=torch.float16,
     )
 
 

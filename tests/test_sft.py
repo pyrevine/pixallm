@@ -1,6 +1,14 @@
 from argparse import Namespace
 
-from pixallm.train.sft import build_lora_config, build_sft_config, parse_target_modules, record_to_messages
+import torch
+
+from pixallm.train.sft import (
+    PrecisionConfig,
+    build_lora_config,
+    build_sft_config,
+    parse_target_modules,
+    record_to_messages,
+)
 
 
 def test_record_to_messages_uses_prompt_and_dsl() -> None:
@@ -45,6 +53,42 @@ def test_sft_config_defaults_match_plan() -> None:
     assert config.gradient_accumulation_steps == 8
     assert config.assistant_only_loss is True
     assert config.max_length == 1024
+
+
+def test_sft_config_falls_back_to_fp16_when_bf16_is_unavailable(monkeypatch) -> None:
+    args = Namespace(
+        output_dir="checkpoints/sft-v1",
+        max_length=1024,
+        num_train_epochs=3.0,
+        max_steps=-1,
+        learning_rate=2e-4,
+        per_device_train_batch_size=2,
+        gradient_accumulation_steps=8,
+        no_bf16=False,
+        no_4bit=True,
+        logging_steps=10,
+        save_steps=200,
+        report_to="none",
+        run_name="pixallm-sft-v1",
+        seed=42,
+    )
+
+    monkeypatch.setattr(
+        "pixallm.train.sft.resolve_precision",
+        lambda _args: PrecisionConfig(
+            use_cpu=False,
+            bf16=False,
+            fp16=True,
+            torch_dtype=torch.float16,
+            compute_dtype=torch.float16,
+        ),
+    )
+
+    config = build_sft_config(args)
+
+    assert config.bf16 is False
+    assert config.fp16 is True
+    assert config.use_cpu is False
 
 
 def test_lora_config_defaults_match_plan() -> None:
