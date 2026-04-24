@@ -72,6 +72,28 @@ uv run python -m pixallm.train.sft \
 
 For RunPod training, pass `--report-to wandb` after installing and logging into Weights & Biases.
 
+## Evaluation
+
+Score a checkpoint (or the base model) against the fixed 100 eval prompts. Each
+prompt is sampled `--num-samples` times; parse rate is computed across all
+samples and the deterministic metrics are averaged over samples that parse.
+
+```bash
+# base model (expect a very low parse rate)
+uv run python -m pixallm.eval.run_eval \
+  --run-name base \
+  --output-file docs/results/eval_base.json
+
+# SFT v1 adapter
+uv run python -m pixallm.eval.run_eval \
+  --adapter-path /workspace/checkpoints/sft-v1 \
+  --run-name sft-v1 \
+  --output-file docs/results/eval_sft_v1.json
+```
+
+Each run writes `{config, aggregate, per_prompt}` JSON. The `aggregate` block
+is suitable for a single row in the model-comparison table.
+
 ## Project Layout
 
 ```text
@@ -79,9 +101,11 @@ src/pixallm/dsl.py            # Palette Index Grid parser/validator
 src/pixallm/render.py         # DSL -> PIL image
 src/pixallm/data/prepare.py   # dataset/image conversion
 src/pixallm/eval/metrics.py   # deterministic metrics
+src/pixallm/eval/run_eval.py  # checkpoint evaluation runner
 src/pixallm/train/sft.py      # QLoRA SFT entrypoint
 scripts/prepare_data.py       # JSONL generation
 scripts/preview_samples.py    # contact sheet preview
+scripts/runpod_setup.sh       # RunPod bootstrap (deps, cache, smoke test)
 data/eval_prompts.json        # fixed eval prompts
 ```
 
